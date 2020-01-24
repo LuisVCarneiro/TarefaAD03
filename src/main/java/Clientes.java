@@ -8,72 +8,71 @@ import java.util.Scanner;
 
 
 public class Clientes {
-    String nome, apelido1, apelido2, email;
+    String nomeCliente, apelidoCliente1, apelidoCliente2, emailCliente;
 
     public Clientes() {
     }
 
-    public Clientes(String nome, String apelido1, String apelido2, String email) {
-        this.nome = nome;
-        this.apelido1 = apelido1;
-        this.apelido2 = apelido2;
-        this.email = email;
+    public Clientes(String nomeCliente, String apelidoCliente1, String apelidoClinete2, String emailCliente) {
+        this.nomeCliente = nomeCliente;
+        this.apelidoCliente1 = apelidoCliente1;
+        this.apelidoCliente2 = apelidoCliente2;
+        this.emailCliente = emailCliente;
     }
 
-    public String getNome() {
-        return nome;
+    public String getNomeCliente() {
+        return nomeCliente;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setNomeCliente(String nomeCliente) {
+        this.nomeCliente = nomeCliente;
     }
 
-    public String getApelido1() {
-        return apelido1;
+    public String getApelidoCliente1() {
+        return apelidoCliente1;
     }
 
-    public void setApelido1(String apelido1) {
-        this.apelido1 = apelido1;
+    public void setApelidoCliente1(String apelidoCliente1) {
+        this.apelidoCliente1 = apelidoCliente1;
+    }
+
+    public String getApelidoCliente2() {
+        return apelidoCliente2;
+    }
+
+    public void setApelidoCliente2(String apelidoCliente2) {
+        this.apelidoCliente2 = apelidoCliente2;
+    }
+
+    public String getEmailCliente() {
+        return emailCliente;
+    }
+
+    public void setEmailCliente(String emailCliente) {
+        this.emailCliente = emailCliente;
     }
     
-    public String getApelido2() {
-        return apelido2;
-    }
-
-    public void setApelido2(String apelido2) {
-        this.apelido2 = apelido2;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    
-    public Clientes datosClientes(){
+    public void datosClientes(){
         Scanner teclado = new Scanner (System.in);
         System.out.println("Nome do cliente: ");
-        this.nome = teclado.nextLine();
+        this.nomeCliente = teclado.nextLine();
         System.out.println("Primeiro apelido do cliente: ");
-        this.apelido1 = teclado.nextLine();
+        this.apelidoCliente1 = teclado.nextLine();
         System.out.println("Segundo apelido do cliente: ");
-        this.apelido2 = teclado.nextLine();
+        this.apelidoCliente2 = teclado.nextLine();
         System.out.println("Email do cliente: ");
-        this.email = teclado.nextLine();
-        return new Clientes();
+        this.emailCliente = teclado.nextLine();
     }
     
-    public void insertCliente(Connection con, String nome, String apelido1, String apelido2, String email){
+    public void insertCliente(Connection con){
+        datosClientes();
         try{
-            String sql = "INSERT INTO Clientes (nome, apelido1, apelido2, email) VALUES(?,?,?,?)";
+            String sql = "INSERT INTO Clientes (nomeCliente, apelidoCliente1, apelidoCliente2, emailCliente) VALUES(?,?,?,?)";
             PreparedStatement pstmt = con.prepareStatement(sql);
-
-            pstmt.setString(1, nome);
-            pstmt.setString(2,apelido1);
-            pstmt.setString(3,apelido2);
-            pstmt.setString(4, email);
+            pstmt.setString(1, getNomeCliente());
+            pstmt.setString(2, getApelidoCliente1());
+            pstmt.setString(3,getApelidoCliente2());
+            pstmt.setString(4, getEmailCliente());
             pstmt.executeUpdate();
             System.out.println("Cliente engadido con éxito");
         }
@@ -87,7 +86,8 @@ public class Clientes {
             Statement statement = con.createStatement();
             ResultSet rs = statement.executeQuery("select * from Clientes");
             while(rs.next()){
-                System.out.println("Cliente = " + rs.getString("nome") + " " + rs.getString("apelido1") + " " + rs.getString("apelido2"));
+                System.out.println("Cliente = " + rs.getString("nomeCliente") + " " + rs.getString("apelidoCliente1") + " " + rs.getString("apelidoCliente2")
+                + " " + rs.getString("emailCliente"));
             }
         }
         catch(SQLException e){
@@ -95,10 +95,22 @@ public class Clientes {
         }
      }
      
-     public void deleteCliente(Connection con, String clienteBorrar){
+      public void deleteCliente(Connection con){
         try{
-            String sql = "DELETE FROM Clientes WHERE nome = ?";
+            Scanner teclado = new Scanner (System.in);
+            String sql = "DELETE FROM Clientes WHERE nomeCliente= ?";
             PreparedStatement pstmt = con.prepareStatement(sql);
+            try{
+            Statement statement = con.createStatement();
+            ResultSet rs = statement.executeQuery("select nomeCliente from Clientes");
+            while (rs.next()){
+                System.out.println("Nome dos clientes: " + rs.getString("nomeCliente"));
+            }
+            }catch (SQLException e){
+                    System.out.println("Non hai nomes que mostrar");
+                    }
+            System.out.println("Nome do cliente que desexa borrar: ");
+            String clienteBorrar = teclado.nextLine();
             pstmt.setString(1, clienteBorrar);
             pstmt.executeUpdate();
             System.out.println("Cliente borrado con éxito");

@@ -23,13 +23,14 @@ public class BaseDatos {
                 System.out.println("A base de datos foi creada");
                 String db = "Franquicia";
                 Connection con = connectDatabase(db);
-                crearTaboaFranquicia(con);
                 crearTaboaTendas(con);
                 crearTaboaProductos(con);
                 crearTaboaClientes(con);
                 crearTaboaEmpregados(con);
                 crearTaboaProductosTendas(con);
                 crearTaboaProvincias(con);
+                Provincias prov = new Provincias();
+                prov.insertProvincia(con, 0, db);
                 crearTaboaEmpregadosTenda(con);
             }
         }catch (SQLException e){
@@ -37,7 +38,6 @@ public class BaseDatos {
     }  
 }
     
-    //Conecta á base de datos coa ruta atributo de getConnection
     public Connection connectDatabase(String filename){
         Connection connection = null;
         try{
@@ -62,31 +62,17 @@ public class BaseDatos {
         }
     }
     
-    public void crearTaboaFranquicia(Connection con){
-        try{
-            String sql = "CREATE TABLE IF NOT EXISTS Franquicia ("
-                    + "nomeTendas text PRIMARY KEY,"
-                    + "nomeClientes text"
-                    + ");";
-            Statement stmt = con.createStatement();
-            stmt.execute(sql);
-            System.out.println("Taboa Franquicias creada.");
-        }catch (SQLException e){
-            System.out.println(e.getMessage());
-        }
-    }
-    
     public void crearTaboaTendas(Connection con){
         try{
             String sql = "CREATE TABLE IF NOT EXISTS Tendas ("
-                    + "nome text PRIMARY KEY NOT NULL,"
-                    + "cidade VARCHAR(20) NOT NULL,"
-                    + "provincia VARCHAR (25) NOT NULL,"
-                    + "nomeEmpregado VARCHAR (10)"
+                    + "nomeTenda text PRIMARY KEY NOT NULL,"
+                    + "cidade text,"
+                    + "nomeProvincia text,"
+                    + "foreign key (nomeProvincia) references Provincias (nomeProvincia)"
                     + ");";
             Statement stmt = con.createStatement();
             stmt.execute(sql);
-            System.out.println("Taboa Tendas creada satisfactoriamente");
+            System.out.println("Táboa Tendas creada correctamente");
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
@@ -95,13 +81,15 @@ public class BaseDatos {
     public void crearTaboaProductosTendas(Connection con){
         try{
             String sql = "CREATE TABLE IF NOT EXISTS ProductosTenda  (\n"
-                    + "nomeTenda text PRIMARY KEY,"
+                    + "nomeTenda text NOT NULL,"
                     + "nomeProducto text NOT NULL, \n"
-                    + "stock integer NOT NULL \n"
+                    + "stock integer, \n"
+                    + "foreign key (nomeProducto) references Productos(nomeProducto), \n"
+                    + "foreign key (nomeTenda) references Tendas(nomeTenda)"
                     + ");";
             Statement stmt = con.createStatement();
             stmt.execute(sql);
-            System.out.println("Táboa ProductosTendas creada satisfactoriamente");
+            System.out.println("Táboa ProductosTenda creada correctamente");
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
@@ -110,13 +98,13 @@ public class BaseDatos {
     public void crearTaboaProductos(Connection con){
         try{
             String sql ="CREATE TABLE IF NOT EXISTS Productos ("
-                    + "nome VARCHAR2(10) PRIMARY KEY NOT NULL,"
-                    + "descripcion VARCHAR2(25) NOT NULL,"
-                    + "prezo INTEGER NOT NULL"
+                    + "nomeProducto text PRIMARY KEY,"
+                    + "descripcion text NOT NULL,"
+                    + "prezo Double"
                     + ");";
             Statement stmt = con.createStatement();
             stmt.execute(sql);
-            System.out.println("Taboa Productos creada satisfactoriamente");
+            System.out.println("Táboa Productos creada correctamente");
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
@@ -125,12 +113,12 @@ public class BaseDatos {
     public void crearTaboaEmpregados(Connection con){
         try{
             String sql ="CREATE TABLE IF NOT EXISTS Empregados (\n"
-                    + "nome PRIMARY KEY, \n"
-                    + "apelidos text NOT NULL \n"
+                    + "nomeEmpregado PRIMARY KEY, \n"
+                    + "apelidosEmpregado text NOT NULL \n"
                     + ");";
             Statement stmt = con.createStatement();
             stmt.execute(sql);
-            System.out.println("Taboa Empregados creada satisfactoriamente");
+            System.out.println("Táboa Empregados creada correctamente");
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
@@ -140,14 +128,14 @@ public class BaseDatos {
         
         try{
             String sql ="CREATE TABLE IF NOT EXISTS Clientes (\n"
-                    + "nome text PRIMARY KEY, \n"
-                    + "apelido1 text NOT NULL, \n"
-                    + "apelido2 text NOT NULL, \n"
-                    + "email text NOT NULL"
+                    + "nomeCliente text, \n"
+                    + "apelidoCliente1 text, \n"
+                    + "apelidoCliente2 text, \n"
+                    + "emailCliente text"
                     + ");";
             Statement stmt = con.createStatement();
             stmt.execute(sql);
-            System.out.println("Taboa Clientes creada satisfactoriamente");
+            System.out.println("Táboa Clientes creada correctamente");
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
@@ -157,11 +145,11 @@ public class BaseDatos {
         try{
             String sql = "CREATE TABLE IF NOT EXISTS Provincias (\n"
                     + "id integer PRIMARY KEY,"
-                    + "nome text NOT NULL"
+                    + "nomeProvincia text"
                     + ");";
             Statement stmt = con.createStatement();
             stmt.execute(sql);
-            System.out.println("Taboa Provincias creada satisfactoriamente");
+            System.out.println("Táboa Provincias creada correctamente");
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
@@ -170,13 +158,15 @@ public class BaseDatos {
     public void crearTaboaEmpregadosTenda(Connection con){
         try{
             String sql = "CREATE TABLE IF NOT EXISTS EmpregadosTenda (\n"
-                    + "nomeEmpregado PRIMARY KEY,"
-                    + "nomeTenda text NOT NULL,"
-                    + "horasSemanais integer NOT NULL"
+                    + "nomeEmpregado PRIMARY KEY, \n"
+                    + "nomeTenda text NOT NULL, \n"
+                    + "horasSemanais integer, \n"
+                    + "foreign key (nomeEmpregado) references Empregados(nomeEmpregado), \n"
+                    + "foreign key (nomeTenda) references Tendas (nomeTenda)"
                     + ");";
             Statement stmt = con.createStatement();
             stmt.execute(sql);
-            System.out.println("Taboa EmpregadosTenda creada satisfactoriamente");
+            System.out.println("Táboa EmpregadosTenda creada correctamente");
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }

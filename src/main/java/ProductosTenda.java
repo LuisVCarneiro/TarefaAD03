@@ -10,6 +10,7 @@ import java.util.Scanner;
 public class ProductosTenda {
     String nomeTenda, nomeProducto;
     int stock;
+    Scanner teclado = new Scanner (System.in);
 
     public ProductosTenda() {
     }
@@ -54,11 +55,27 @@ public class ProductosTenda {
         this.stock = teclado.nextInt();
     }
     
-    public void insertProductoTenda(Connection con, String nomeTenda, String nomeProducto, int stock){
+    public void insertProductoTenda(Connection con){
+        try{
+                Statement statement = con.createStatement();
+                ResultSet rs = statement.executeQuery("Select nomeTenda from Tendas");
+                while (rs.next()){
+                    System.out.println(rs.getString("nomeTenda") + "\n");
+                }
+            }catch (SQLException e){
+                        System.out.println("Non se poden ler as tendas");
+                        }
+         System.out.println("Indica o nome da tenda na que engadir o producto");
+         this.nomeTenda = teclado.nextLine();
+         System.out.println("Qué producto queres engadir?");
+         this.nomeProducto = teclado.nextLine();
+         System.out.println("Stock inicial: ");
+         this.stock = teclado.nextInt();
+         
         try{
             String sql = "INSERT INTO ProductosTenda (nomeTenda, nomeProducto, stock) VALUES(?,?,?)";
             PreparedStatement pstmt = con.prepareStatement(sql);
-
+            
             pstmt.setString(1, nomeTenda);
             pstmt.setString(2, nomeProducto);
             pstmt.setInt(3, stock);
@@ -70,31 +87,48 @@ public class ProductosTenda {
         }
     }
     
-    public void deleteProductoTenda(Connection con, String productoTendaBorrar){
+    public void deleteProductoTenda(Connection con){
+        Tendas tenda = new Tendas();
+        tenda.listarTendas(con);
+        System.out.println("De qué tenda queres eliminar o producto?");
+        this.nomeTenda = teclado.nextLine();
         try{
-            String sql = "DELETE FROM ProductosTenda WHERE nomeProducto = ?";
-            PreparedStatement pstmt = con.prepareStatement(sql);
-            pstmt.setString(1, productoTendaBorrar);
-            pstmt.executeUpdate();
-            System.out.println("Producto borrado con éxito");
-        }
-        catch(SQLException e){
+            Statement statement = con.createStatement();
+            ResultSet rs = statement.executeQuery("select nomeProducto from ProductosTenda where nomeTenda = '" + getNomeTenda() + "';");
+            while(rs.next()){
+                System.out.println("Os productos desta tenda son: ");
+                System.out.println(rs.getString("nomeProducto") + "\n");
+            }
+        }catch(SQLException e){
             System.err.println(e.getMessage());
         }
-    }
-    
-    public String productoTendaSeleccionado(){
-        Scanner teclado = new Scanner (System.in);
-        System.out.println("Escribe o nome do producto que desexas borrar");
-        return teclado.nextLine();
+            System.out.println("Cal é o producto do que desexas eliminar?");
+            this.nomeProducto = teclado.nextLine();
+            try{
+                Statement statement = con.createStatement();
+                String sql = "delete from ProductosTenda where nomeTenda = ? and nomeProducto = ?";
+                PreparedStatement pstmt = con.prepareStatement(sql);
+                pstmt.setString(1, getNomeTenda());
+                pstmt.setString(2, getNomeProducto());
+                pstmt.executeUpdate();
+                System.out.println("Producto eliminado");
+            }
+            catch(SQLException e){
+                System.err.println(e.getMessage());
+            }
     }
     
     public void consultarProductoTenda(Connection con){
+       Tendas tenda = new Tendas();
+       tenda.listarTendas(con);
+        System.out.println("De qué tenda queres consultar os productos?");
+        this.nomeTenda = teclado.nextLine();
         try{
             Statement statement = con.createStatement();
-            ResultSet rs = statement.executeQuery("select nomeProducto from ProductosTenda");
+            ResultSet rs = statement.executeQuery("select nomeProducto from ProductosTenda where nomeTenda = '" + getNomeTenda() + "';");
+            System.out.println("Productos da tenda: ");
             while(rs.next()){
-                System.out.println("Producto = " + rs.getString("nomeProducto"));
+                System.out.println(rs.getString("nomeProducto"));
             }
         }
         catch(SQLException e){
@@ -102,17 +136,67 @@ public class ProductosTenda {
         }
     }
     
-    public void consultarStrockProducto(Connection con){
+    public void consultarStockProducto(Connection con){
+        Tendas tenda = new Tendas();
+        tenda.listarTendas(con);
+        System.out.println("De qué tenda queres consultar o stock de productos?");
+        this.nomeTenda = teclado.nextLine();
         try{
             Statement statement = con.createStatement();
-            ResultSet rs = statement.executeQuery("select stock from ProductosTenda WHERE nomeProducto = (?)");
+            ResultSet rs = statement.executeQuery("select nomeProducto from ProductosTenda where nomeTenda = '" + getNomeTenda() + "';");
             while(rs.next()){
-                System.out.println("Stock producto = " + rs.getString("stock"));
+                System.out.println("Os productos desta tenda son: ");
+                System.out.println(rs.getString("nomeProducto") + "\n");
             }
-        }
-        catch(SQLException e){
+        }catch(SQLException e){
             System.err.println(e.getMessage());
         }
+            System.out.println("Cal é o producto do que desexas saber o stock?");
+            this.nomeProducto = teclado.nextLine();
+            try{
+                Statement statement = con.createStatement();
+                ResultSet rs = statement.executeQuery("select stock from ProductosTenda where nomeTenda = '" + getNomeTenda() + "' and nomeProducto = '" + getNomeProducto() + "';");
+                while(rs.next()){
+                    System.out.println(rs.getString("stock") + " unidades.");
+                }
+            }
+            catch(SQLException e){
+                System.err.println(e.getMessage());
+            }
+        
     }
-
+    
+    public void actualizarStockProductoTenda(Connection con){
+        Tendas t = new Tendas();
+        t.listarTendas(con);
+        System.out.println("De qué tenda queres actualizar o stock de productos?");
+        this.nomeTenda = teclado.nextLine();
+        try{
+            Statement statement = con.createStatement();
+            ResultSet rs = statement.executeQuery("select nomeProducto from ProductosTenda where nomeTenda = '" + getNomeTenda() + "';");
+            while(rs.next()){
+                System.out.println("Os productos desta tenda son: ");
+                System.out.println(rs.getString("nomeProducto") + "\n");
+            }
+        }catch(SQLException e){
+            System.err.println(e.getMessage());
+        }
+            System.out.println("Cal é o producto do que desexas actualizar o stock?");
+            this.nomeProducto = teclado.nextLine();
+            System.out.println("Cal é a cantidade a actualizar?");
+            this.stock = teclado.nextInt();
+            try{
+                Statement statement = con.createStatement();
+                String sql = "update productosTenda set stock = ? where nomeTenda = ? and nomeProducto = ? ;";
+                PreparedStatement pstmt = con.prepareStatement(sql);
+                pstmt.setInt(1, stock);
+                pstmt.setString(2, nomeTenda);
+                pstmt.setString(3, nomeProducto);
+                pstmt.executeUpdate();
+                System.out.println("Stock actualizado.");
+            }
+            catch(SQLException e){
+                System.err.println(e.getMessage());
+            }
+    }
 }

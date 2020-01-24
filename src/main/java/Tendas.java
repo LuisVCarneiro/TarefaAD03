@@ -9,16 +9,16 @@ import java.util.Scanner;
 
 
 public class Tendas {
-    String nome, provincia, cidade, nomeEmpregados;
+    String nome, provincia, cidade;
+    Scanner teclado = new Scanner (System.in);
 
     public Tendas() {
     }
 
-    public Tendas(String nome, String provincia, String cidade, String nomeEmpregados) {
+    public Tendas(String nome, String provincia, String cidade) {
         this.nome = nome;
         this.provincia = provincia;
         this.cidade = cidade;
-        this.nomeEmpregados = nomeEmpregados;
         
     }
 
@@ -45,37 +45,25 @@ public class Tendas {
     public void setCidade(String cidade) {
         this.cidade = cidade;
     }
-
-    public String getNomeEmpregados() {
-        return nomeEmpregados;
-    }
-
-    public void setEmpregados(String empregados) {
-        this.nomeEmpregados = nomeEmpregados;
-    }
     
-    public Tendas datosTendas(){
-        Scanner teclado = new Scanner (System.in);
+    public void datosTendas(){
         System.out.println("Nome da tenda: ");
         this.nome = teclado.nextLine();
         System.out.println("Cidade da tenda: ");
         this.cidade= teclado.nextLine();
         System.out.println("Provincia da tenda: ");
         this.provincia = teclado.nextLine();
-        System.out.println("Empregado da tenda: ");
-        this.nomeEmpregados = teclado.nextLine();
-        return new Tendas();
     }
-     
-    public void insertTenda(Connection con, String nome, String cidade, String provincia, String nomeEmpregado){
+
+    public void insertTenda(Connection con){
+        datosTendas();
         try{
-            String sql = "INSERT INTO Tendas (nome, cidade, provincia, nomeEmpregado) VALUES(?,?,?,?)";
+            String sql = "INSERT INTO Tendas (nomeTenda, cidade, nomeProvincia) VALUES(?,?,?)";
             PreparedStatement pstmt = con.prepareStatement(sql);
 
-            pstmt.setString(1, nome);
-            pstmt.setString(2, cidade);
-            pstmt.setString(3, provincia);
-            pstmt.setString(4, nomeEmpregado);
+            pstmt.setString(1, getNome());
+            pstmt.setString(2, getCidade());
+            pstmt.setString(3, getProvincia());
             pstmt.executeUpdate();
             System.out.println("Tenda engadida con éxito");
         }
@@ -84,14 +72,13 @@ public class Tendas {
         }
     }
       
+      
     public void consultarTenda(Connection con){
          try{
             Statement statement = con.createStatement();
             ResultSet rs = statement.executeQuery("select * from Tendas");
             while(rs.next()){
-                System.out.println("Tenda: \nNome: " + rs.getString("nome") + ", cidade " + rs.getString("cidade") + ", provincia " + rs.getString("provincia") +
-                        ", empregado " + 
-                        rs.getString("nomeEmpregado"));
+                System.out.println("Tenda: \nNome: " + rs.getString("nomeTenda") + ", cidade " + rs.getString("cidade") + ", provincia " + rs.getString("nomeProvincia"));
             }
         }
         catch(SQLException e){
@@ -100,10 +87,21 @@ public class Tendas {
     }
    
      
-    public void deleteTenda(Connection con, String nomeBorrar){
+    public void deleteTenda(Connection con){
         try{
-            String sql = "DELETE FROM Tendas WHERE nome = ?";
+            try{
+                Statement statement = con.createStatement();
+                ResultSet rs = statement.executeQuery("Select nomeTenda from Tendas");
+                while (rs.next()){
+                    System.out.println(rs.getString("nomeTenda") + "\n");
+                }
+            }catch (SQLException e){
+                        System.out.println("Non se poden ler as tendas");
+                        }
+            String sql = "DELETE FROM Tendas WHERE nomeTenda = (?)";
             PreparedStatement pstmt = con.prepareStatement(sql);
+            System.out.println("Qué tenda queres eliminar?");
+            String nomeBorrar = teclado.nextLine();
             pstmt.setString(1, nomeBorrar);
             pstmt.executeUpdate();
             System.out.println("Tenda borrada con éxito");
@@ -113,10 +111,17 @@ public class Tendas {
         }
     }
     
-    
-    public String tendaSeleccionada(){
-        Scanner teclado = new Scanner (System.in);
-        System.out.println("Escribe o nome da tenda que desexas borrar");
-        return teclado.nextLine();
+    public void listarTendas(Connection con){
+         try{
+            Statement statement = con.createStatement();
+            ResultSet rs = statement.executeQuery("select * from Tendas");
+             System.out.println("Listado de tendas: ");
+            while(rs.next()){
+                System.out.println(rs.getString("nomeTenda"));
+            }
+        }
+        catch(SQLException e){
+            System.err.println(e.getMessage());
+        }
     }
 }

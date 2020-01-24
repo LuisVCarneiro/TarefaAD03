@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 
@@ -22,7 +21,7 @@ public class Provincias {
 
     public Provincias(int id, String nome) {
         this.id = id;
-        this.nome = nome;
+        this.nome= nome;
         this.provincias = new ArrayList <>();
         
     }
@@ -50,6 +49,8 @@ public class Provincias {
     public void setProvincias(ArrayList<Provincias> provincias) {
         this.provincias = provincias;
     }
+
+    
     
     public void lerProvincias(){    
         try{
@@ -93,29 +94,18 @@ public class Provincias {
             Gson gson = new Gson();
             Provincias p = gson.fromJson(json, Provincias.class);
             //System.out.println("Provincias: " );
-            String sql = "INSERT INTO Provincias (id, nome) VALUES (?,?)";
+            String sql = "INSERT INTO Provincias (id, nomeProvincia) VALUES (?,?)";
             PreparedStatement pstmt = con.prepareStatement(sql);
             for (int i = 0; i < p.provincias.size(); i++){
                 provinciaAux = p.getProvincias().get(i);
-                pstmt.setObject(id, nome);
+                pstmt.setInt(1,provinciaAux.getId());
+                pstmt.setString(2, provinciaAux.getNome());
                 pstmt.executeUpdate();
-                System.out.println("Provincia introducida correctamente");
-                //System.out.println(provinciaAux.getId() + " " + provinciaAux.getNome());
+               // System.out.println("Provincia introducida correctamente");
             }
             System.out.println("Provincias insertadas");
         }catch(Exception e){
             System.out.println(e.getMessage());
         }
-        /*try{
-            String sql = "INSERT INTO Provincias (id, nome) VALUES(?,?)";
-            PreparedStatement pstmt = con.prepareStatement(sql);
-            pstmt.setInt(1, id);
-            pstmt.setString(2, nome);
-            pstmt.executeUpdate();
-            System.out.println("Provincia engadida con éxito");
-            }       
-        catch(SQLException e){
-            System.out.println(e.getMessage());
-        }*/
     }
 }
